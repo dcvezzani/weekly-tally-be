@@ -1,0 +1,23 @@
+{
+  "name": "weekly-tally-be",
+  "version": "0.0.0",
+  "private": true,
+  "scripts": {
+    "start": "nodemon ./bin/www"
+  },
+  "dependencies": {
+    "body-parser": "~1.18.2",
+    "bookshelf": "^0.12.1",
+    "cookie-parser": "~1.4.3",
+    "debug": "~2.6.9",
+    "express": "~4.15.5",
+    "jade": "~1.11.0",
+    "morgan": "~1.9.0",
+    "serve-favicon": "~2.4.5",
+    "sqlite3": "^3.1.13"
+  },
+  "devDependencies": {
+    "knex": "^0.14.2",
+    "knex-migrate": "^1.5.1"
+  }
+}

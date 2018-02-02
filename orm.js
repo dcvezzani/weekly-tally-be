@@ -9,5 +9,5 @@ var Week = bookshelf.Model.extend({
   // }
 });
 
-module.exports = {Week: Week}
+module.exports = {Week: Week, knex: knex}
 

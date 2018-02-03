@@ -3,24 +3,27 @@ var moment = require('moment');
 var orm = require('../orm');
 var router = express.Router();
 
-function gatherWeekDays (fullWeek, weeks, idx, date, stopDate) {
-	// console.log([date, stopDate]);
+function gatherWeekDays (fullWeek, weeks, idx, date, stopDate, done) {
+	console.log([date, stopDate]);
 	if (date > stopDate) {
-		return fullWeek
+		console.log({ weeks: fullWeek });
+		done(fullWeek);
+		return;
 	}
 
 	// console.log([weeks[idx], moment(weeks[idx].recorded_at).toString(), date.toString()]);
-	if (weeks[idx] && moment(weeks[idx].recorded_at).format("YYYY-MM-DD") == date.format("YYYY-MM-DD")) {
+	if (weeks && weeks[idx] && moment(weeks[idx].recorded_at).format("YYYY-MM-DD") == date.format("YYYY-MM-DD")) {
 		fullWeek.push (weeks[idx]);
 		date = date.add(1, 'days');
-		return gatherWeekDays (fullWeek, weeks, idx+1, date, stopDate)
+		return gatherWeekDays (fullWeek, weeks, idx+1, date, stopDate, done)
 	} else {
-		console.log([moment(weeks[idx].recorded_at).format("YYYY-MM-DD"), date.format("YYYY-MM-DD")]);
+		// console.log([moment(weeks[idx].recorded_at).format("YYYY-MM-DD"), date.format("YYYY-MM-DD")]);
 		// console.log({recorded_at: date.format("YYYY-MM-DD")});
 		new orm.Week({recorded_at: date.format("YYYY-MM-DD")}).save().then((week) => {
-			fullWeek.push (week);
+			// console.log(week.attributes);
+			fullWeek.push (week.attributes);
 			date =date.add(1, 'days');
-			return gatherWeekDays (fullWeek, weeks, idx, date, stopDate)
+			return gatherWeekDays (fullWeek, weeks, idx, date, stopDate, done)
 		});
 	}
 }
@@ -30,8 +33,13 @@ router.get('/', function(req, res, next) {
 	console.log(req.query.recordedAtStart);
 	const sql = "select * from weeks where recorded_at >= Date('" + req.query.recordedAtStart + " 00:00:00') and recorded_at <= Date('" + req.query.recordedAtStop + " 00:00:00') order by recorded_at";
 	new orm.knex.raw(sql).then((weeks) => {
-		const fullWeek = gatherWeekDays([], weeks, 0, moment(req.query.recordedAtStart), moment(req.query.recordedAtStop));
-		res.json({ weeks: fullWeek });
+		new Promise((resolve, reject) => {
+			gatherWeekDays([], weeks, 0, moment(req.query.recordedAtStart), moment(req.query.recordedAtStop), resolve)
+		})
+		.then((fullWeek) => {
+			console.log({ weeks: fullWeek });
+			res.json({ weeks: fullWeek });
+		});
 	});
 });
 

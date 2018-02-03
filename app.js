@@ -8,7 +8,7 @@ var bodyParser = require('body-parser');
 
 var index = require('./routes/index');
 var users = require('./routes/users');
-var weeks = require('./routes/weeks');
+var days = require('./routes/days');
 
 var app = express();
 app.use(cors())
@@ -27,7 +27,7 @@ app.use(express.static(path.join(__dirname, 'public')));
 
 app.use('/', index);
 app.use('/users', users);
-app.use('/api/weeks', weeks);
+app.use('/api/week', days);
 
 // catch 404 and forward to error handler
 app.use(function(req, res, next) {

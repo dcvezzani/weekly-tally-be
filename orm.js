@@ -2,12 +2,12 @@ var config = require('./knexfile');
 var knex = require('knex')(config.development);
 var bookshelf = require('bookshelf')(knex);
 
-var Week = bookshelf.Model.extend({
-  tableName: 'weeks',
+var Day = bookshelf.Model.extend({
+  tableName: 'days',
   // posts: function() {
   //   return this.hasMany(Posts);
   // }
 });
 
-module.exports = {Week: Week, knex: knex}
+module.exports = {Day: Day, knex: knex}
 

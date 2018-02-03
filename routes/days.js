@@ -43,6 +43,22 @@ router.get('/', function(req, res, next) {
 	});
 });
 
+router.get('/:topic/total', function(req, res, next) {
+	let topic = req.params.topic.replace(/-/, '_');
+
+	if (!['positive_food', 'negative_food', 'water', 'exercise', 'daily_greatness', 'scripture_study', 'personal_prayer'].includes(topic)) {
+		console.error({error: "unsupported topic", value: topic});
+		res.json({error: "unsupported topic", value: topic});
+		return;
+	}
+
+	const sql = "select sum(" + topic + "_points) as total from days where recorded_on >= Date('" + req.query.recordedAtStart + " 00:00:00') and recorded_on <= Date('" + req.query.recordedAtStop + " 00:00:00') order by recorded_on";
+	new orm.knex.raw(sql).then((data) => {
+		console.log(["sum of points", data[0].total]);
+		res.json({ topic: topic, total: data[0].total});
+	});
+});
+
 /* CREATE day. */
 router.post('/day', function(req, res, next) {
 	new orm.Day(req.body).save().then((day) => {

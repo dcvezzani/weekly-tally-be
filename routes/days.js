@@ -43,10 +43,24 @@ router.get('/', function(req, res, next) {
 	});
 });
 
+/* SHOW total. */
+router.get('/all/total', function(req, res, next) {
+	let topic = 'all';
+
+	let summable_elements = 'ifnull(sum(' + ['positive_food', 'fruits_vegetables', 'negative_food', 'water', 'after_8', 'daily_greatness', 'scripture_study', 'personal_prayer'].join('_points),0) + ifnull(sum(') + '_points),0)';
+
+	const sql = "select (" + summable_elements + ") as total, sum(exercise_points) as exercise_total from days where recorded_on >= Date('" + req.query.recordedAtStart + " 00:00:00') and recorded_on <= Date('" + req.query.recordedAtStop + " 00:00:00') order by recorded_on";
+	new orm.knex.raw(sql).then((data) => {
+		console.log(["sum of points", data, data[0].total]);
+		res.json({ topic: topic, total: data[0].total, asdf: 'qwer', exercise_total: data[0].exercise_total});
+	});
+});
+
+/* SHOW total. */
 router.get('/:topic/total', function(req, res, next) {
 	let topic = req.params.topic.replace(/-/, '_');
 
-	if (!['positive_food', 'negative_food', 'water', 'exercise', 'daily_greatness', 'scripture_study', 'personal_prayer', 'all'].includes(topic)) {
+	if (!['positive_food', 'fruits_vegetables', 'negative_food', 'water', 'after_8', 'exercise', 'daily_greatness', 'scripture_study', 'personal_prayer'].includes(topic)) {
 		console.error({error: "unsupported topic", value: topic});
 		res.json({error: "unsupported topic", value: topic});
 		return;
@@ -54,7 +68,7 @@ router.get('/:topic/total', function(req, res, next) {
 
 	let summable_elements = 'ifnull(sum(' + topic + "_points),0)"
 	if (topic == 'all') { 
-		summable_elements = 'ifnull(sum(' + ['positive_food', 'negative_food', 'water', 'exercise', 'daily_greatness', 'scripture_study', 'personal_prayer'].join('_points),0) + ifnull(sum(') + '_points),0)'
+		summable_elements = 'ifnull(sum(' + ['positive_food', 'fruits_vegetables', 'negative_food', 'water', 'after_8', 'exercise', 'daily_greatness', 'scripture_study', 'personal_prayer'].join('_points),0) + ifnull(sum(') + '_points),0)'
 	}
 
 	const sql = "select (" + summable_elements + ") as total from days where recorded_on >= Date('" + req.query.recordedAtStart + " 00:00:00') and recorded_on <= Date('" + req.query.recordedAtStop + " 00:00:00') order by recorded_on";
@@ -75,6 +89,7 @@ function pointsFor (topic) {
 	let pointValue = 0;
 	switch (topic) {
 		case 'positive_food':
+		case 'fruits_vegetables':
 		case 'water':
 			pointValue = 10;
 			break;

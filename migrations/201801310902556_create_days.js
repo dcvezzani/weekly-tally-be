@@ -8,6 +8,9 @@ exports.up = function(knex, Promise) {
 			t.text('positive_food_details').nullable();
 			t.integer('positive_food_points').nullable();
 
+			t.text('fruits_vegetables_details').nullable();
+			t.integer('fruits_vegetables_points').nullable();
+
 			t.text('negative_food_details').nullable();
 			t.integer('negative_food_points').nullable();
 

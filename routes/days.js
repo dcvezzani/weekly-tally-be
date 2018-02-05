@@ -3,7 +3,7 @@ var moment = require('moment');
 var orm = require('../orm');
 var router = express.Router();
 
-function gatherWeekDays (fullWeek, days, idx, date, stopDate, done) {
+function gatherWeekDays (user_id, fullWeek, days, idx, date, stopDate, done) {
 	console.log([date, stopDate]);
 	if (date > stopDate) {
 		console.log({ days: fullWeek });
@@ -15,26 +15,27 @@ function gatherWeekDays (fullWeek, days, idx, date, stopDate, done) {
 	if (days && days[idx] && moment(days[idx].recorded_on).format("YYYY-MM-DD") == date.format("YYYY-MM-DD")) {
 		fullWeek.push (days[idx]);
 		date = date.add(1, 'days');
-		return gatherWeekDays (fullWeek, days, idx+1, date, stopDate, done)
+		return gatherWeekDays (user_id, fullWeek, days, idx+1, date, stopDate, done)
 	} else {
 		// console.log([moment(days[idx].recorded_on).format("YYYY-MM-DD"), date.format("YYYY-MM-DD")]);
 		// console.log({recorded_on: date.format("YYYY-MM-DD")});
-		new orm.Day({recorded_on: date.format("YYYY-MM-DD")}).save().then((day) => {
+		new orm.Day({user_id: user_id, recorded_on: date.format("YYYY-MM-DD")}).save().then((day) => {
 			// console.log(day.attributes);
 			fullWeek.push (day.attributes);
 			date =date.add(1, 'days');
-			return gatherWeekDays (fullWeek, days, idx, date, stopDate, done)
+			return gatherWeekDays (user_id, fullWeek, days, idx, date, stopDate, done)
 		});
 	}
 }
 
 /* INDEX days. */
-router.get('/', function(req, res, next) {
-	console.log(req.query.recordedAtStart);
-	const sql = "select * from days where recorded_on >= Date('" + req.query.recordedAtStart + " 00:00:00') and recorded_on <= Date('" + req.query.recordedAtStop + " 00:00:00') order by recorded_on";
+router.get('/user/:user_id/week', function(req, res, next) {
+	let user_id = req.params.user_id;
+	console.log(req.query);
+	const sql = "select * from days where user_id == " + user_id + " and recorded_on >= Date('" + req.query.recordedAtStart + " 00:00:00') and recorded_on <= Date('" + req.query.recordedAtStop + " 00:00:00') order by recorded_on";
 	new orm.knex.raw(sql).then((days) => {
 		new Promise((resolve, reject) => {
-			gatherWeekDays([], days, 0, moment(req.query.recordedAtStart), moment(req.query.recordedAtStop), resolve)
+			gatherWeekDays(user_id, [], days, 0, moment(req.query.recordedAtStart), moment(req.query.recordedAtStop), resolve)
 		})
 		.then((fullWeek) => {
 			console.log({ days: fullWeek });
@@ -44,12 +45,14 @@ router.get('/', function(req, res, next) {
 });
 
 /* SHOW total. */
-router.get('/all/total', function(req, res, next) {
+router.get('/user/:user_id/week/all/total', function(req, res, next) {
+	let user_id = req.params.user_id;
 	let topic = 'all';
+	console.log(req.params);
 
 	let summable_elements = 'ifnull(sum(' + ['positive_food', 'fruits_vegetables', 'negative_food', 'water', 'after_8', 'daily_greatness', 'scripture_study', 'personal_prayer'].join('_points),0) + ifnull(sum(') + '_points),0)';
 
-	const sql = "select (" + summable_elements + ") as total, sum(exercise_points) as exercise_total from days where recorded_on >= Date('" + req.query.recordedAtStart + " 00:00:00') and recorded_on <= Date('" + req.query.recordedAtStop + " 00:00:00') order by recorded_on";
+	const sql = "select (" + summable_elements + ") as total, sum(exercise_points) as exercise_total from days where user_id == " + user_id + " and recorded_on >= Date('" + req.query.recordedAtStart + " 00:00:00') and recorded_on <= Date('" + req.query.recordedAtStop + " 00:00:00') order by recorded_on";
 	new orm.knex.raw(sql).then((data) => {
 		console.log(["sum of points", data, data[0].total]);
 		res.json({ topic: topic, total: data[0].total, asdf: 'qwer', exercise_total: data[0].exercise_total});
@@ -57,8 +60,10 @@ router.get('/all/total', function(req, res, next) {
 });
 
 /* SHOW total. */
-router.get('/:topic/total', function(req, res, next) {
+router.get('/user/:user_id/week/:topic/total', function(req, res, next) {
+	let user_id = req.params.user_id;
 	let topic = req.params.topic.replace(/-/, '_');
+	console.log(req.params);
 
 	if (!['positive_food', 'fruits_vegetables', 'negative_food', 'water', 'after_8', 'exercise', 'daily_greatness', 'scripture_study', 'personal_prayer'].includes(topic)) {
 		console.error({error: "unsupported topic", value: topic});
@@ -71,7 +76,7 @@ router.get('/:topic/total', function(req, res, next) {
 		summable_elements = 'ifnull(sum(' + ['positive_food', 'fruits_vegetables', 'negative_food', 'water', 'after_8', 'exercise', 'daily_greatness', 'scripture_study', 'personal_prayer'].join('_points),0) + ifnull(sum(') + '_points),0)'
 	}
 
-	const sql = "select (" + summable_elements + ") as total from days where recorded_on >= Date('" + req.query.recordedAtStart + " 00:00:00') and recorded_on <= Date('" + req.query.recordedAtStop + " 00:00:00') order by recorded_on";
+	const sql = "select (" + summable_elements + ") as total from days where user_id == " + user_id + " and recorded_on >= Date('" + req.query.recordedAtStart + " 00:00:00') and recorded_on <= Date('" + req.query.recordedAtStop + " 00:00:00') order by recorded_on";
 	new orm.knex.raw(sql).then((data) => {
 		console.log(["sum of points", data]);
 		res.json({ topic: topic, total: data[0].total});
@@ -79,7 +84,7 @@ router.get('/:topic/total', function(req, res, next) {
 });
 
 /* CREATE day. */
-router.post('/day', function(req, res, next) {
+router.post('/user/:user_id/week/day', function(req, res, next) {
 	new orm.Day(req.body).save().then((day) => {
 		res.json({ day: day });
 	});
@@ -113,7 +118,7 @@ function pointsFor (topic) {
 }
 
 /* UPDATE day. */
-router.put('/day/:date', function(req, res, next) {
+router.put('/user/:user_id/week/day/:date', function(req, res, next) {
   orm.Day.where({recorded_on: req.params.date}).fetch().then((data) => {
 		let attrs = {}
 		for (attr in req.body) {

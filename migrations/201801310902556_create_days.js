@@ -2,6 +2,7 @@
 exports.up = function(knex, Promise) {
 	return knex.schema.createTable('days', function(t) {
 			t.increments('id').unsigned().primary();
+			t.integer('user_id').notNull();
 
 			t.dateTime('recorded_on').notNull();
 		

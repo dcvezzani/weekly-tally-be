@@ -25,13 +25,14 @@ router.post('/tokensignin', function(req, res, next) {
       //[CLIENT_ID_1, CLIENT_ID_2, CLIENT_ID_3],
       (e, login) => {
         var payload = login.getPayload();
+        console.log(["payload", payload]);
         var user = null;
 
         orm.User.where({google_id: payload['sub']}).fetch({require: true}).then((model) => {
           return Promise.resolve(model);
         })
         .catch((err) => {
-          return new orm.User({google_id: payload['sub'], email: payload['email']}).save().then(function(model) {
+          return new orm.User({google_id: payload['sub'], email: payload['email'], given_name: payload['given_name'], family_name: payload['family_name'], picture: payload['picture']}).save().then(function(model) {
             return Promise.resolve(model);
           });
         })
@@ -39,7 +40,7 @@ router.post('/tokensignin', function(req, res, next) {
           let user = model.attributes;
           console.log(['user', user]);
           // resToken = jwt.sign({ id: user.id, google_id: payload['sub'], email: payload['email'] }, CLIENT_SECRET);
-          resToken = jwt.sign({ id: user.id, google_id: payload['sub'], email: payload['email'] }, CLIENT_SECRET);
+          resToken = jwt.sign({ id: user.id, google_id: payload['sub'], email: payload['email'], given_name: payload['given_name'], family_name: payload['family_name'], picture: payload['picture'] }, CLIENT_SECRET);
           // console.log(["payload", payload]);
           // console.log(["resToken", resToken]);
 

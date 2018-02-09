@@ -84,11 +84,12 @@ router.get('/user/:user_id/week/:topic/total', function(req, res, next) {
 });
 
 /* CREATE day. */
-router.post('/user/:user_id/week/day', function(req, res, next) {
-	new orm.Day(req.body).save().then((day) => {
-		res.json({ day: day });
-	});
-});
+// router.post('/user/:user_id/week/day', function(req, res, next) {
+// 	let user_id = req.params.user_id;
+// 	new orm.Day(req.body).save().then((day) => {
+// 		res.json({ day: day });
+// 	});
+// });
 
 function pointsFor (topic) {
 	let pointValue = 0;
@@ -119,7 +120,7 @@ function pointsFor (topic) {
 
 /* UPDATE day. */
 router.put('/user/:user_id/week/day/:date', function(req, res, next) {
-  orm.Day.where({recorded_on: req.params.date}).fetch().then((data) => {
+  orm.Day.where({user_id: req.params.user_id, recorded_on: req.params.date}).fetch().then((data) => {
 		let attrs = {}
 		for (attr in req.body) {
 			let matched = attr.match(/^(.*)_checked$/);

@@ -9,5 +9,12 @@ var Day = bookshelf.Model.extend({
   // }
 });
 
-module.exports = {Day: Day, knex: knex}
+var User = bookshelf.Model.extend({
+  tableName: 'users',
+  // posts: function() {
+  //   return this.hasMany(Posts);
+  // }
+});
+
+module.exports = {Day: Day, User: User, knex: knex}
 

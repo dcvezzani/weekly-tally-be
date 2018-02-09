@@ -11,9 +11,6 @@ var Day = bookshelf.Model.extend({
 
 var User = bookshelf.Model.extend({
   tableName: 'users',
-  // posts: function() {
-  //   return this.hasMany(Posts);
-  // }
 });
 
 module.exports = {Day: Day, User: User, knex: knex}

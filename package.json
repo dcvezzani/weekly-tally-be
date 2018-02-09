@@ -3,8 +3,8 @@
   "version": "0.0.0",
   "private": true,
   "scripts": {
-    "xstart": "nodemon ./bin/www",
-    "start": "PORT=3002 nodemon ./bin/www"    
+    "start": "nodemon ./bin/www",
+    "xstart": "PORT=3002 nodemon ./bin/www"    
   },
   "dependencies": {
     "body-parser": "~1.18.2",

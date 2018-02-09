@@ -5,10 +5,12 @@ var favicon = require('serve-favicon');
 var logger = require('morgan');
 var cookieParser = require('cookie-parser');
 var bodyParser = require('body-parser');
+// var session = require('express-session')
 
 var index = require('./routes/index');
 var users = require('./routes/users');
 var days = require('./routes/days');
+var auth = require('./routes/auth');
 
 var app = express();
 app.use(cors())
@@ -23,11 +25,24 @@ app.use(logger('dev'));
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: false }));
 app.use(cookieParser());
+
+// see https://www.codementor.io/emjay/how-to-build-a-simple-session-based-authentication-system-with-nodejs-from-scratch-6vn67mcy3
+// app.use(session({
+//     key: 'user_sid',
+//     secret: 'somerandonstuffs',
+//     resave: false,
+//     saveUninitialized: false,
+//     cookie: {
+//         expires: 600000
+//     }
+// }));
+
 app.use(express.static(path.join(__dirname, 'public')));
 
 app.use('/', index);
 app.use('/users', users);
 app.use('/api', days);
+app.use('/', auth);
 
 // catch 404 and forward to error handler
 app.use(function(req, res, next) {

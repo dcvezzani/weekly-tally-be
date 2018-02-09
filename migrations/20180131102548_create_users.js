@@ -1,6 +1,7 @@
 exports.up = async function(knex) {
   await knex.schema.createTable("users", function(t) {
-    t.increments();
+		t.increments('id').unsigned().primary();
+		t.string('google_id').nullable();
 		t.text('name').nullable();
 		t.text('email').nullable();
 		t.integer('weight_factor').nullable();

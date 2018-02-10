@@ -4,13 +4,9 @@ var orm = require('../orm');
 
 const {OAuth2Client} = require('google-auth-library');
 
-// var CLIENT_ID = '38977793520-u51b5kpvkfuokp2ev9vb3vllfkl6oaqo.apps.googleusercontent.com';
-// var CLIENT_SECRET = '6s9Lnzi4QDq1oX5HDoJDRd_x';
-// var CLIENT_CALLBACK = 'http://reliacode.com:8080';
-
-var CLIENT_ID = '38977793520-2eute2ed36ddd4kjj6ss91d7vecsukpj.apps.googleusercontent.com';
-var CLIENT_SECRET = 'pzPiT1BcL_iDWdNZ8rxu75n-';
-var CLIENT_CALLBACK = 'https://reliacode.com';
+var CLIENT_ID = "38977793520-2eute2ed36ddd4kjj6ss91d7vecsukpj.apps.googleusercontent.com";
+var CLIENT_SECRET = "pzPiT1BcL_iDWdNZ8rxu75n-";
+var CLIENT_CALLBACK = "https://reliacode.com";
 
 var client = new OAuth2Client(CLIENT_ID, CLIENT_SECRET, CLIENT_CALLBACK);
 var jwt = require('jsonwebtoken');

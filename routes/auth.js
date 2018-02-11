@@ -17,6 +17,7 @@ router.post('/tokensignin', function(req, res, next) {
   var userid = null;
   var userid = 'xxx';
   var resToken = null;
+  // console.log(['req.body.token', req.body.token]);
   client.verifyIdToken(
       {
         idToken: req.body.token,
